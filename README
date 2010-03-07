@@ -1,0 +1,2 @@
+A buddhabrot renderer implemented in FORTRAN
+Only tested using Intel's fortran compiler (which is free for non-commercial use on linux)
