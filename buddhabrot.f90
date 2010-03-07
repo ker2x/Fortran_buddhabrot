@@ -7,11 +7,12 @@ INTEGER, PARAMETER :: file_out_unit = 10
 
 
 ! mix/max grid coordinate
-REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3 
+REAL, PARAMETER :: xmin = -1.3, xmax = 2.0, ymin = -1.3, ymax =1.3 
 
 ! Arbitrary maximum # of iterations
 INTEGER,   PARAMETER :: n_max=100
 INTEGER,   PARAMETER :: grid_resolution = 1000
+INTEGER,   PARAMETER :: zpower = 2 
 INTEGER*8, PARAMETER :: batchSize = 10000000
 
 !Track pixel exposure by color
@@ -40,13 +41,11 @@ DO i=1, batchSize
   !y = RANDOM(0) * 4. - 2.        !old code was : y = RANDOM(0) * (ymax-ymin) + ymin
   CALL RANDOM_NUMBER(x)
   CALL RANDOM_NUMBER(y)
-  x = x * 4. - 2.
-  y = y * 4. - 2.
-  z = CMPLX(x,y)                 !choose a random point on complex plane
+  z = CMPLX(x*4. - 2. ,y*4. - 2.)                 !choose a random point on complex plane
   IF (notInMSet(z, n_max)) THEN  !if it espace out of the mandelbrot set
     c = z                        !then
     DO iter=1, n_max             !iterate and plot orbit
-      z = z*z + c                !mandelbrot formula : Z = Z²+C
+      z = z**zpower + c                !mandelbrot formula : Z = Z²+C
       !IF(CABS(z) < 4) THEN      !it was supposed to improve speed, but it slow down the code :'(
         TempX = INT(grid_resolution * (REAL(z) + xmax) / (xmax - xmin)) 
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
@@ -103,7 +102,7 @@ CONTAINS
 	  n = 0
 
 	  DO WHILE (ABS(z) < 4.0 .AND. (n < n_max))
-	    z = z*z + c
+	    z = z**zpower + c
 	    n = n + 1
 	  END DO
 
