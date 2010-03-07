@@ -3,50 +3,49 @@ USE omp_lib
 use ifport
 IMPLICIT NONE
 
-CHARACTER ( len = 255 ) :: filename = 'buddhabrot.ppm'
-INTEGER :: file_out_unit = 10
+CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
+INTEGER, PARAMETER :: file_out_unit = 10
 
 
 ! mix/max grid coordinate
 REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3 
 
 ! Arbitrary maximum # of iterations
-INTEGER, PARAMETER :: n_max=100
-INTEGER, PARAMETER :: grid_resolution = 1000
+INTEGER,   PARAMETER :: n_max=100
+INTEGER,   PARAMETER :: grid_resolution = 1000
 INTEGER*8, PARAMETER :: batchSize = 10000000
 
+!Track pixel exposure by color
 INTEGER :: exposureRMap(grid_resolution, grid_resolution)
 INTEGER :: exposureGMap(grid_resolution, grid_resolution)
 INTEGER :: exposureBMap(grid_resolution, grid_resolution)
 
-REAL :: x,y
 INTEGER*8 :: i
+REAL    :: x,y
 COMPLEX :: z, c
 INTEGER :: iter
 INTEGER :: tempX, tempY
 
-integer :: ppm_i
-integer :: ppm_j
-integer :: ppm_jhi
-integer :: ppm_jlo
+INTEGER :: ppm_i
+INTEGER :: ppm_j
+INTEGER :: ppm_jhi
+INTEGER :: ppm_jlo
 
+!initialize exposureMap to 1
 exposureRMap = 1
 exposureGMap = 1
 exposureBMap = 1
 
 
 x = RANDOM(1)
-!DEC$ PARALLEL
 DO i=1, batchSize
-  x = RANDOM(0) * 4. - 2.
-  y = RANDOM(0) * 4. - 2.
-  !x = RANDOM(0) * (xmax-xmin) + xmin
-  !y = RANDOM(0) * (ymax-ymin) + ymin
-  z = CMPLX(x,y)
-  IF (notInMSet(z, n_max)) THEN
-    c = z
-    DO iter=1, n_max
-      z = z*z + c
+  x = RANDOM(0) * 4. - 2.        !old code was : x = RANDOM(0) * (xmax-xmin) + xmin
+  y = RANDOM(0) * 4. - 2.        !old code was : y = RANDOM(0) * (ymax-ymin) + ymin
+  z = CMPLX(x,y)                 !choose a random point on complex plane
+  IF (notInMSet(z, n_max)) THEN  !if it espace out of the mandelbrot set
+    c = z                        !then
+    DO iter=1, n_max             !iterate and plot orbit
+      z = z*z + c                !mandelbrot formula : Z = Z²+C
       IF(CABS(z) < 4) THEN
         TempX = INT(grid_resolution * (REAL(z) + xmax) / (xmax - xmin)) 
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
