@@ -3,7 +3,8 @@ USE omp_lib
 use ifport
 IMPLICIT NONE
 
-character ( len = 255 ) :: filename = 'buddhabrot.ppm'
+CHARACTER ( len = 255 ) :: filename = 'buddhabrot.ppm'
+INTEGER :: file_out_unit = 10
 
 
 ! mix/max grid coordinate
@@ -11,8 +12,8 @@ REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3
 
 ! Arbitrary maximum # of iterations
 INTEGER, PARAMETER :: n_max=100
-INTEGER, PARAMETER :: grid_resolution = 2000
-INTEGER*8, PARAMETER :: batchSize = 1000000000
+INTEGER, PARAMETER :: grid_resolution = 1000
+INTEGER*8, PARAMETER :: batchSize = 10000000
 
 INTEGER :: exposureRMap(grid_resolution, grid_resolution)
 INTEGER :: exposureGMap(grid_resolution, grid_resolution)
@@ -24,11 +25,10 @@ COMPLEX :: z, c
 INTEGER :: iter
 INTEGER :: tempX, tempY
 
-integer ppm_i
-integer ppm_j
-integer ppm_jhi
-integer ppm_jlo
-integer file_out_unit
+integer :: ppm_i
+integer :: ppm_j
+integer :: ppm_jhi
+integer :: ppm_jlo
 
 exposureRMap = 1
 exposureGMap = 1
@@ -73,6 +73,7 @@ exposureGMap = exposureGMap / (MAXVAL(exposureGMap)/128. )
 exposureBMap = exposureBMap / (MAXVAL(exposureBMap)/255. )
 !write(*,*) MAXVAL(exposureRMap) , MAXVAL(exposureGMap) , MAXVAL(exposureBMap)
 !write(*,*) MINVAL(exposureRMap) , MINVAL(exposureGMap) , MINVAL(exposureBMap)
+
 
 open ( unit = file_out_unit, file = filename, status = 'replace', &
        form = 'formatted', access = 'sequential')
