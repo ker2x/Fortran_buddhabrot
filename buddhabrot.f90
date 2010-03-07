@@ -1,6 +1,5 @@
 PROGRAM MANDEL
 USE omp_lib
-use ifport
 IMPLICIT NONE
 
 CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
@@ -36,17 +35,19 @@ exposureRMap = 1
 exposureGMap = 1
 exposureBMap = 1
 
-
-x = RANDOM(1)
 DO i=1, batchSize
-  x = RANDOM(0) * 4. - 2.        !old code was : x = RANDOM(0) * (xmax-xmin) + xmin
-  y = RANDOM(0) * 4. - 2.        !old code was : y = RANDOM(0) * (ymax-ymin) + ymin
+  !x = RANDOM(0) * 4. - 2.        !old code was : x = RANDOM(0) * (xmax-xmin) + xmin
+  !y = RANDOM(0) * 4. - 2.        !old code was : y = RANDOM(0) * (ymax-ymin) + ymin
+  CALL RANDOM_NUMBER(x)
+  CALL RANDOM_NUMBER(y)
+  x = x * 4. - 2.
+  y = y * 4. - 2.
   z = CMPLX(x,y)                 !choose a random point on complex plane
   IF (notInMSet(z, n_max)) THEN  !if it espace out of the mandelbrot set
     c = z                        !then
     DO iter=1, n_max             !iterate and plot orbit
       z = z*z + c                !mandelbrot formula : Z = Z²+C
-      IF(CABS(z) < 4) THEN
+      !IF(CABS(z) < 4) THEN      !it was supposed to improve speed, but it slow down the code :'(
         TempX = INT(grid_resolution * (REAL(z) + xmax) / (xmax - xmin)) 
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
@@ -58,7 +59,7 @@ DO i=1, batchSize
               exposureGMap(TempX, TempY) = exposureGMap(TempX, TempY) + 1
           ENDIF
         END IF
-      END IF
+      !END IF  !(cabs(z)<4)
     END DO
   END IF
 END DO
@@ -70,8 +71,6 @@ exposureBMap = exposureBMap - (MINVAL(exposureBMap) )
 exposureRMap = exposureRMap / (MAXVAL(exposureRMap)/255. )
 exposureGMap = exposureGMap / (MAXVAL(exposureGMap)/128. )
 exposureBMap = exposureBMap / (MAXVAL(exposureBMap)/255. )
-!write(*,*) MAXVAL(exposureRMap) , MAXVAL(exposureGMap) , MAXVAL(exposureBMap)
-!write(*,*) MINVAL(exposureRMap) , MINVAL(exposureGMap) , MINVAL(exposureBMap)
 
 
 open ( unit = file_out_unit, file = filename, status = 'replace', &
@@ -83,7 +82,8 @@ write ( file_out_unit, '(i5)' ) 255
 do ppm_i = 1, grid_resolution
 do ppm_jlo = 1, grid_resolution, 4
     ppm_jhi = min ( ppm_jlo + 3, grid_resolution )
-    write ( file_out_unit, '(12i5)' ) ( exposureRMap(ppm_i,ppm_j), exposureGMap(ppm_i,ppm_j),exposureBMap(ppm_i,ppm_j), ppm_j = ppm_jlo,ppm_jhi )
+    write ( file_out_unit, '(12i5)' ) & 
+    ( exposureRMap(ppm_i,ppm_j), exposureGMap(ppm_i,ppm_j),exposureBMap(ppm_i,ppm_j), ppm_j = ppm_jlo,ppm_jhi )
   end do
 end do
 
