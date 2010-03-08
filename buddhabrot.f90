@@ -7,9 +7,9 @@ INTEGER, PARAMETER :: file_out_unit = 10
 
 
 INTEGER,   PARAMETER :: n_max=100
-INTEGER,   PARAMETER :: grid_resolution = 1000
+INTEGER,   PARAMETER :: grid_resolution = 800
 INTEGER,   PARAMETER :: zpower = 2 
-INTEGER*8, PARAMETER :: batchSize = 10000000
+INTEGER*8, PARAMETER :: batchSize = 50000000
 REAL,      PARAMETER :: escapeOrbit = 4
 REAL,      PARAMETER :: xmin = -1.3, xmax = 2.0, ymin = -1.3, ymax =1.3 
 
@@ -50,18 +50,18 @@ DO i=1, batchSize
     c = z                        !then
     DO iter=1, n_max              !iterate and plot orbit
       z = z**zpower + c                !mandelbrot formula : Z = Z²+C
-      IF(CABS(z) < escapeOrbit) THEN   !usefull when n_max > 1000
+      IF(ABS(z) < escapeOrbit) THEN   !usefull when n_max > 1000
         TempX = INT(grid_resolution * (REAL(z) + xmax) / (xmax - xmin)) 
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
-          IF((iter > 2)  .AND. (iter < 30)) THEN
+          IF((iter > 2)  .AND. (iter < 50)) THEN
             exposureRMap(TempX, TempY) = exposureRMap(TempX, TempY) + 1
           END IF
-          IF((iter > 20) .AND. (iter < 70)) THEN
-            exposureBMap(TempX, TempY) = exposureBMap(TempX, TempY) + 1
+          IF((iter > 30) .AND. (iter < 70)) THEN
+            exposureGMap(TempX, TempY) = exposureGMap(TempX, TempY) + 1
           END IF
           IF((iter > 50) .AND. (iter < 100)) THEN
-            exposureGMap(TempX, TempY) = exposureGMap(TempX, TempY) + 1
+            exposureBMap(TempX, TempY) = exposureBMap(TempX, TempY) + 1
           ENDIF
         END IF
       END IF  !(cabs(z)<4)
@@ -75,7 +75,7 @@ maxGExposure = MAXVAL(exposureGMap)
 minGExposure = MINVAL(exposureGMap)
 maxBExposure = MAXVAL(exposureBMap)
 minBExposure = MINVAL(exposureBMap)
-write(*,*) maxRExposure, minRExposure, maxGExposure, minGExposure, maxBExposure, minBExposure
+!write(*,*) maxRExposure, minRExposure, maxGExposure, minGExposure, maxBExposure, minBExposure
 
 minExposure = MIN(minRExposure, minGExposure, minBExposure)
 maxExposure = MAX(maxRExposure, maxGExposure, maxBExposure)
