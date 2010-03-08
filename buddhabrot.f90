@@ -47,20 +47,20 @@ DO i=1, batchSize
   CALL RANDOM_NUMBER(y)
   z = CMPLX(x*4. - 2. ,y*4. - 2.) !choose a random point on complex plane
   IF (notInMSet(z, n_max)) THEN   !if it espace out of the mandelbrot set
-    c = z                         !then
+    c = z                        !then
     DO iter=1, n_max              !iterate and plot orbit
       z = z**zpower + c                !mandelbrot formula : Z = Z²+C
       IF(CABS(z) < escapeOrbit) THEN   !usefull when n_max > 1000
         TempX = INT(grid_resolution * (REAL(z) + xmax) / (xmax - xmin)) 
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
-          IF(iter > 0  .AND. iter < 10) THEN
+          IF((iter > 2)  .AND. (iter < 30)) THEN
             exposureRMap(TempX, TempY) = exposureRMap(TempX, TempY) + 1
           END IF
-          IF(iter > 9 .AND. iter < 50) THEN
+          IF((iter > 20) .AND. (iter < 70)) THEN
             exposureBMap(TempX, TempY) = exposureBMap(TempX, TempY) + 1
           END IF
-          IF(iter > 49 .AND. iter < 100) THEN
+          IF((iter > 50) .AND. (iter < 100)) THEN
             exposureGMap(TempX, TempY) = exposureGMap(TempX, TempY) + 1
           ENDIF
         END IF
@@ -75,7 +75,7 @@ maxGExposure = MAXVAL(exposureGMap)
 minGExposure = MINVAL(exposureGMap)
 maxBExposure = MAXVAL(exposureBMap)
 minBExposure = MINVAL(exposureBMap)
-!write(*,*) maxRExposure, minRExposure, maxGExposure, minGExposure, maxBExposure, minBExposure
+write(*,*) maxRExposure, minRExposure, maxGExposure, minGExposure, maxBExposure, minBExposure
 
 minExposure = MIN(minRExposure, minGExposure, minBExposure)
 maxExposure = MAX(maxRExposure, maxGExposure, maxBExposure)
@@ -83,15 +83,23 @@ maxExposure = MAX(maxRExposure, maxGExposure, maxBExposure)
 exposureRMap = exposureRMap - minExposure
 exposureGMap = exposureGMap - minExposure
 exposureBMap = exposureBMap - minExposure
-exposureRMap = exposureRMap / (maxExposure/intensityR )
-exposureGMap = exposureGMap / (maxExposure/intensityG )
-exposureBMap = exposureBMap / (maxExposure/intensityB )
+exposureRMap = (exposureRMap / REAL(maxRExposure))*intensityR 
+exposureGMap = (exposureGMap / REAL(maxGExposure))*intensityG 
+exposureBMap = (exposureBMap / REAL(maxBExposure))*intensityB 
+
+!maxRExposure = MAXVAL(exposureRMap)
+!minRExposure = MINVAL(exposureRMap)
+!maxGExposure = MAXVAL(exposureGMap)
+!minGExposure = MINVAL(exposureGMap)
+!maxBExposure = MAXVAL(exposureBMap)
+!minBExposure = MINVAL(exposureBMap)
+!write(*,*) maxRExposure, minRExposure, maxGExposure, minGExposure, maxBExposure, minBExposure
 
 open ( unit = file_out_unit, file = filename, status = 'replace', &
        form = 'formatted', access = 'sequential')
 write ( file_out_unit, '(a2)' ) 'P3'
 write ( file_out_unit, '(i5,2x,i5)' ) grid_resolution, grid_resolution
-write ( file_out_unit, '(i5)' ) 255
+write ( file_out_unit, '(i5)' ) INT(MAX(intensityR,intensityG,intensityB))
 
 do ppm_i = 1, grid_resolution
 do ppm_jlo = 1, grid_resolution, 4
@@ -113,7 +121,7 @@ CONTAINS
 	  INTEGER             :: n 
 	  COMPLEX             :: z
 	  LOGICAL             :: notInMSet
-	  z = c
+	  z = 0
 	  n = 0
 
 	  DO WHILE (ABS(z) < escapeOrbit .AND. (n < n_max))
