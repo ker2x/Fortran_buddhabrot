@@ -2,7 +2,7 @@ PROGRAM MANDEL
 USE omp_lib
 IMPLICIT NONE
 
-CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot3.ppm'
+CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
 INTEGER, PARAMETER :: file_out_unit = 10
 
 
