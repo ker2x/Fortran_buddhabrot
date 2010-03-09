@@ -2,14 +2,14 @@ PROGRAM MANDEL
 USE omp_lib
 IMPLICIT NONE
 
-CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
+CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot3.ppm'
 INTEGER, PARAMETER :: file_out_unit = 10
 
 
-INTEGER,   PARAMETER :: n_max=100
-INTEGER,   PARAMETER :: grid_resolution = 800
+INTEGER,   PARAMETER :: n_max=10000
+INTEGER,   PARAMETER :: grid_resolution = 500
 INTEGER,   PARAMETER :: zpower = 2 
-INTEGER*8, PARAMETER :: batchSize = 50000000
+INTEGER*8, PARAMETER :: batchSize = 200000
 REAL,      PARAMETER :: escapeOrbit = 4
 REAL,      PARAMETER :: xmin = -1.3, xmax = 2.0, ymin = -1.3, ymax =1.3 
 
@@ -50,21 +50,21 @@ DO i=1, batchSize
     c = z                        !then
     DO iter=1, n_max              !iterate and plot orbit
       z = z**zpower + c                !mandelbrot formula : Z = Z²+C
-      IF(ABS(z) < escapeOrbit) THEN   !usefull when n_max > 1000
+      !IF(ABS(z) < escapeOrbit) THEN
         TempX = INT(grid_resolution * (REAL(z) + xmax) / (xmax - xmin)) 
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
-          IF((iter > 2)  .AND. (iter < 50)) THEN
+          IF((iter > 2)  .AND. (iter < 500)) THEN
             exposureRMap(TempX, TempY) = exposureRMap(TempX, TempY) + 1
           END IF
-          IF((iter > 30) .AND. (iter < 70)) THEN
+          IF((iter > 300) .AND. (iter < 700)) THEN
             exposureGMap(TempX, TempY) = exposureGMap(TempX, TempY) + 1
           END IF
-          IF((iter > 50) .AND. (iter < 100)) THEN
+          IF((iter > 500) .AND. (iter < 1000)) THEN
             exposureBMap(TempX, TempY) = exposureBMap(TempX, TempY) + 1
           ENDIF
         END IF
-      END IF  !(cabs(z)<4)
+      !END IF  !(cabs(z)<4)
     END DO
   END IF
 END DO
@@ -121,18 +121,21 @@ CONTAINS
 	  INTEGER             :: n 
 	  COMPLEX             :: z
 	  LOGICAL             :: notInMSet
-	  z = 0
+	  z = c
 	  n = 0
-
-	  DO WHILE (ABS(z) < escapeOrbit .AND. (n < n_max))
-	    z = z**zpower + c
-	    n = n + 1
-	  END DO
-
-	  IF (n >= n_max) THEN
+	  IF(((ABS(z - CMPLX(-1,0) )) < 0.25) .OR. (( ABS( 1.0 - SQRT(1-(4*z))  ) < 1.0 ) )  ) THEN
 	    notInMset = .FALSE.
 	  ELSE
-	    notInMset = .TRUE.
+	    DO WHILE (ABS(z) < escapeOrbit .AND. (n < n_max))
+	      z = z**zpower + c
+	      n = n + 1
+	    END DO
+
+	    IF (n >= n_max) THEN
+	      notInMset = .FALSE.
+	    ELSE
+	      notInMset = .TRUE.
+	    END IF
 	  END IF
 	END FUNCTION notInMset
 
