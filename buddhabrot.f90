@@ -11,7 +11,7 @@ INTEGER, PARAMETER :: grid_resolution = 500
 INTEGER, PARAMETER :: zpower = 2
 INTEGER*8, PARAMETER :: batchSize = 2000000
 REAL, PARAMETER :: escapeOrbit = 4
-REAL, PARAMETER :: xmin = -1.3, xmax = 2.0, ymin = -1.3, ymax =1.3
+REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3
  
 REAL, PARAMETER :: intensityR = 255.
 REAL, PARAMETER :: intensityG = 255.
@@ -47,7 +47,7 @@ DO i=1, batchSize
   CALL RANDOM_NUMBER(x)
   CALL RANDOM_NUMBER(y)
   z = CMPLX(0,0)
-  c = CMPLX(x*4. - 2. ,y*4. - 2.) !choose a random point on complex plane
+  c = CMPLX(x*3. - 2. ,y*2.6 - 1.3) !choose a random point on complex plane
   IF (notInMSet(c, n_max)) THEN !if it espace out of the mandelbrot set
     !c = z !then
     DO iter=1, n_max !iterate and plot orbit
