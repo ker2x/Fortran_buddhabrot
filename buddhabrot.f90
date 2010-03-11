@@ -9,13 +9,13 @@ INTEGER, PARAMETER :: file_out_unit = 10
 INTEGER, PARAMETER :: n_max=10000
 INTEGER, PARAMETER :: grid_resolution = 512
 INTEGER, PARAMETER :: zpower = 2
-INTEGER*8, PARAMETER :: batchSize = 400000
+INTEGER*8, PARAMETER :: batchSize = 1000000
 REAL, PARAMETER :: escapeOrbit = 2
 REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3
  
-REAL, PARAMETER :: intensityR = 1024.
-REAL, PARAMETER :: intensityG = 1024.
-REAL, PARAMETER :: intensityB = 1024.
+REAL, PARAMETER :: intensityR = 2048.
+REAL, PARAMETER :: intensityG = 2048.
+REAL, PARAMETER :: intensityB = 2048.
  
 !Track pixel exposure by color
 INTEGER :: exposureRMap(grid_resolution, grid_resolution)
@@ -42,7 +42,7 @@ exposureRMap = 1
 exposureGMap = 1
 exposureBMap = 1
  
-!$OMP PARALLEL DO SHARED(exposureRMap, exposureGMap, exposureBMap)
+!$OMP PARALLEL DO DEFAULT(PRIVATE),SHARED(exposureRMap, exposureGMap, exposureBMap)
 DO i=1, batchSize
   CALL RANDOM_NUMBER(x)
   CALL RANDOM_NUMBER(y)
