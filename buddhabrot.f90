@@ -6,7 +6,7 @@ CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
 INTEGER, PARAMETER :: file_out_unit = 10
  
  
-INTEGER, PARAMETER :: n_max=100
+INTEGER, PARAMETER :: n_max=1000
 INTEGER, PARAMETER :: grid_resolution = 512
 INTEGER, PARAMETER :: zpower = 2
 INTEGER*8, PARAMETER :: batchSize = 10000000
@@ -57,15 +57,15 @@ DO i=1, batchSize
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         TempYm = INT(grid_resolution/2 - (TempY - grid_resolution/2))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
-          IF((iter > 2) .AND. (iter < 10)) THEN
+          IF((iter > 2) .AND. (iter < 300)) THEN
             exposureRMap(TempX, TempY)  = exposureRMap(TempX, TempY) + 1
             exposureRMap(TempX, TempYm) = exposureRMap(TempX, TempYm) + 1
           END IF
-          IF((iter > 10) .AND. (iter < 50)) THEN
+          IF((iter > 150) .AND. (iter < 600)) THEN
             exposureGMap(TempX, TempY)  = exposureGMap(TempX, TempY) + 1
             exposureGMap(TempX, TempYm) = exposureGMap(TempX, TempYm) + 1
           END IF
-          IF((iter > 50) .AND. (iter < 100)) THEN
+          IF((iter > 400) .AND. (iter < 1000)) THEN
             exposureBMap(TempX, TempY)  = exposureBMap(TempX, TempY) + 1
             exposureBMap(TempX, TempYm) = exposureBMap(TempX, TempYm) + 1
           ENDIF
