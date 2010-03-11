@@ -6,16 +6,16 @@ CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
 INTEGER, PARAMETER :: file_out_unit = 10
  
  
-INTEGER, PARAMETER :: n_max=100000
+INTEGER, PARAMETER :: n_max=10000
 INTEGER, PARAMETER :: grid_resolution = 512
 INTEGER, PARAMETER :: zpower = 2
 INTEGER*8, PARAMETER :: batchSize = 400000
 REAL, PARAMETER :: escapeOrbit = 2
 REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3
  
-REAL, PARAMETER :: intensityR = 255.
-REAL, PARAMETER :: intensityG = 255.
-REAL, PARAMETER :: intensityB = 255.
+REAL, PARAMETER :: intensityR = 1024.
+REAL, PARAMETER :: intensityG = 1024.
+REAL, PARAMETER :: intensityB = 1024.
  
 !Track pixel exposure by color
 INTEGER :: exposureRMap(grid_resolution, grid_resolution)
@@ -57,15 +57,15 @@ DO i=1, batchSize
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         TempYm = INT(grid_resolution/2 - (TempY - grid_resolution/2))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
-          IF((iter > 2) .AND. (iter < 5000)) THEN
+          IF((iter > 2) .AND. (iter < 1000)) THEN
             exposureRMap(TempX, TempY)  = exposureRMap(TempX, TempY) + 1
             exposureRMap(TempX, TempYm) = exposureRMap(TempX, TempYm) + 1
           END IF
-          IF((iter > 3000) .AND. (iter < 7000)) THEN
+          IF((iter > 1000) .AND. (iter < 5000)) THEN
             exposureGMap(TempX, TempY)  = exposureGMap(TempX, TempY) + 1
             exposureGMap(TempX, TempYm) = exposureGMap(TempX, TempYm) + 1
           END IF
-          IF((iter > 5000) .AND. (iter < 100000)) THEN
+          IF((iter > 5000) .AND. (iter < 10000)) THEN
             exposureBMap(TempX, TempY)  = exposureBMap(TempX, TempY) + 1
             exposureBMap(TempX, TempYm) = exposureBMap(TempX, TempYm) + 1
           ENDIF
@@ -79,19 +79,19 @@ END DO
 
 
 maxRExposure = MAXVAL(exposureRMap)
-minRExposure = MINVAL(exposureRMap)
+!minRExposure = MINVAL(exposureRMap)
 maxGExposure = MAXVAL(exposureGMap)
-minGExposure = MINVAL(exposureGMap)
+!minGExposure = MINVAL(exposureGMap)
 maxBExposure = MAXVAL(exposureBMap)
-minBExposure = MINVAL(exposureBMap)
+!minBExposure = MINVAL(exposureBMap)
 !write(*,*) maxRExposure, minRExposure, maxGExposure, minGExposure, maxBExposure, minBExposure
  
-minExposure = MIN(minRExposure, minGExposure, minBExposure)
+!minExposure = MIN(minRExposure, minGExposure, minBExposure)
 maxExposure = MAX(maxRExposure, maxGExposure, maxBExposure)
  
-exposureRMap = exposureRMap - minExposure
-exposureGMap = exposureGMap - minExposure
-exposureBMap = exposureBMap - minExposure
+!exposureRMap = exposureRMap - minExposure
+!exposureGMap = exposureGMap - minExposure
+!exposureBMap = exposureBMap - minExposure
 exposureRMap = (exposureRMap / REAL(maxRExposure))*intensityR
 exposureGMap = (exposureGMap / REAL(maxGExposure))*intensityG
 exposureBMap = (exposureBMap / REAL(maxBExposure))*intensityB
