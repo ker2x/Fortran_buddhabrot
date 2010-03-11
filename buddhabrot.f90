@@ -6,7 +6,7 @@ CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
 INTEGER, PARAMETER :: file_out_unit = 10
  
  
-INTEGER, PARAMETER :: n_max=1000
+INTEGER, PARAMETER :: n_max=10000
 INTEGER, PARAMETER :: grid_resolution = 500
 INTEGER, PARAMETER :: zpower = 2
 INTEGER*8, PARAMETER :: batchSize = 2000000
@@ -46,22 +46,23 @@ exposureBMap = 1
 DO i=1, batchSize
   CALL RANDOM_NUMBER(x)
   CALL RANDOM_NUMBER(y)
-  z = CMPLX(x*4. - 2. ,y*4. - 2.) !choose a random point on complex plane
-  IF (notInMSet(z, n_max)) THEN !if it espace out of the mandelbrot set
-    c = z !then
+  z = CMPLX(0,0)
+  c = CMPLX(x*4. - 2. ,y*4. - 2.) !choose a random point on complex plane
+  IF (notInMSet(c, n_max)) THEN !if it espace out of the mandelbrot set
+    !c = z !then
     DO iter=1, n_max !iterate and plot orbit
       z = z**zpower + c !mandelbrot formula : Z = Z²+C
       !IF(ABS(z) < escapeOrbit) THEN
         TempX = INT(grid_resolution * (REAL(z) + xmax) / (xmax - xmin))
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
-          IF((iter > 2) .AND. (iter < 500)) THEN
+          IF((iter > 2) .AND. (iter < 5000)) THEN
             exposureRMap(TempX, TempY) = exposureRMap(TempX, TempY) + 1
           END IF
-          IF((iter > 300) .AND. (iter < 700)) THEN
+          IF((iter > 3000) .AND. (iter < 7000)) THEN
             exposureGMap(TempX, TempY) = exposureGMap(TempX, TempY) + 1
           END IF
-          IF((iter > 500) .AND. (iter < 1000)) THEN
+          IF((iter > 5000) .AND. (iter < 10000)) THEN
             exposureBMap(TempX, TempY) = exposureBMap(TempX, TempY) + 1
           ENDIF
         END IF
@@ -116,16 +117,16 @@ close ( unit = file_out_unit )
  
  
 CONTAINS
- 
+
 PURE FUNCTION notInMset(c, n_max)
   COMPLEX, INTENT(IN) :: c
   INTEGER, INTENT(IN) :: n_max
   INTEGER :: n
   COMPLEX :: z
   LOGICAL :: notInMSet
-  z = c
+  z = CMPLX(0,0) 
   n = 0
-  IF(((ABS(z - CMPLX(-1,0) )) < 0.25) .OR. (( ABS( 1.0 - SQRT(1-(4*z)) ) < 1.0 ) ) ) THEN
+  IF(((ABS(c - CMPLX(-1,0) )) < 0.25) .OR. (( ABS( 1.0 - SQRT(1-(4*c)) ) < 1.0 ) ) ) THEN
     notInMset = .FALSE.
   ELSE
     DO WHILE (ABS(z) < escapeOrbit .AND. (n < n_max))
