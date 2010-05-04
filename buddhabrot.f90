@@ -15,18 +15,9 @@ INTEGER*8, PARAMETER :: batchSize = 100000000
 REAL, PARAMETER :: escapeOrbit = 4
 REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3
  
-!REAL, PARAMETER :: intensityR = 2048.
-!REAL, PARAMETER :: intensityG = 2048.
-!REAL, PARAMETER :: intensityB = 2048.
+REAL, PARAMETER :: intensity = 2048.
  
-!Track pixel exposure by color
-!INTEGER :: exposureRMap(grid_resolution, grid_resolution)
-!INTEGER :: exposureGMap(grid_resolution, grid_resolution)
-!INTEGER :: exposureBMap(grid_resolution, grid_resolution)
 INTEGER :: exposureMap(grid_resolution, grid_resolution)
- 
-!INTEGER :: maxRExposure, maxGExposure, maxBExposure
-!INTEGER :: minRExposure, minGExposure, minBExposure
 INTEGER :: maxExposure, minExposure
  
 INTEGER*8 :: i
@@ -41,16 +32,13 @@ INTEGER :: ppm_jhi
 INTEGER :: ppm_jlo
  
 !initialize exposureMap to 1
-exposureRMap = 0
-exposureGMap = 0
-exposureBMap = 0
+exposureMap = 0
  
 !$OMP PARALLEL DO DEFAULT(PRIVATE),SHARED(exposureRMap, exposureGMap, exposureBMap)
 DO i=1, batchSize
   CALL RANDOM_NUMBER(x)
   CALL RANDOM_NUMBER(y)
   z = CMPLX(0,0)
-  !c = CMPLX(x*2.5 - 2 ,y*2.6 - 1.3) !choose a random point on complex plane 
   c = CMPLX((x*2.5 - 2) ,y*1.3 ) !choose a random point on complex plane
   IF (notInMSet(c, n_max)) THEN !if it espace out of the mandelbrot set
     DO iter=1, n_max !iterate and plot orbit
@@ -60,20 +48,10 @@ DO i=1, batchSize
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         TempYm = INT(grid_center - (TempY - grid_resolution/2))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
-          IF((iter > 5) .AND. (iter < 500)) THEN
-            exposureRMap(TempX, TempY)  = exposureRMap(TempX, TempY) + 1
-            exposureRMap(TempX, TempYm) = exposureRMap(TempX, TempYm) + 1
-          END IF
-          IF((iter > 500) .AND. (iter < 750)) THEN
-            exposureGMap(TempX, TempY)  = exposureGMap(TempX, TempY) + 1
-            exposureGMap(TempX, TempYm) = exposureGMap(TempX, TempYm) + 1
-          END IF
-          IF((iter > 500) .AND. (iter < 1000)) THEN
-            exposureBMap(TempX, TempY)  = exposureBMap(TempX, TempY) + 1
-            exposureBMap(TempX, TempYm) = exposureBMap(TempX, TempYm) + 1
-          ENDIF
+            exposureMap(TempX, TempY)  = exposureMap(TempX, TempY) + 1
+            exposureMap(TempX, TempYm) = exposureMap(TempX, TempYm) + 1
         END IF
-      END IF !(cabs(z)<4)
+      END IF 
     END DO
   END IF
 END DO
@@ -81,23 +59,22 @@ END DO
  
 
 
-maxRExposure = MAXVAL(exposureRMap)
-!minRExposure = MINVAL(exposureRMap)
-maxGExposure = MAXVAL(exposureGMap)
-!minGExposure = MINVAL(exposureGMap)
-maxBExposure = MAXVAL(exposureBMap)
-!minBExposure = MINVAL(exposureBMap)
-!write(*,*) maxRExposure, minRExposure, maxGExposure, minGExposure, maxBExposure, minBExposure
+!maxRExposure = MAXVAL(exposureRMap)
+!maxGExposure = MAXVAL(exposureGMap)
+!maxBExposure = MAXVAL(exposureBMap)
+maxExposure = MAXVAL(exposureMap)
+!write(*,*) maxExposure, minExposure
  
-!minExposure = MIN(minRExposure, minGExposure, minBExposure)
-maxExposure = MAX(maxRExposure, maxGExposure, maxBExposure)
+minExposure = MIN(minExposure)
+maxExposure = MAX(maxExposure)
  
 !exposureRMap = exposureRMap - minExposure
 !exposureGMap = exposureGMap - minExposure
 !exposureBMap = exposureBMap - minExposure
-exposureRMap = (exposureRMap / REAL(maxRExposure))*intensityR
-exposureGMap = (exposureGMap / REAL(maxGExposure))*intensityG
-exposureBMap = (exposureBMap / REAL(maxBExposure))*intensityB
+!exposureRMap = (exposureRMap / REAL(maxRExposure))*intensityR
+!exposureGMap = (exposureGMap / REAL(maxGExposure))*intensityG
+!exposureBMap = (exposureBMap / REAL(maxBExposure))*intensityB
+exposureBMap = (exposureMap / REAL(maxExposure))*intensity
  
 open ( unit = file_out_unit, file = filename, status = 'replace', &
        form = 'formatted', access = 'sequential')
