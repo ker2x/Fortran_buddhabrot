@@ -6,16 +6,16 @@ CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
 INTEGER, PARAMETER :: file_out_unit = 10
  
  
-INTEGER, PARAMETER :: n_max=1000
-INTEGER, PARAMETER :: grid_resolution = 2048
+INTEGER, PARAMETER :: n_max=1000000
+INTEGER, PARAMETER :: grid_resolution = 1024
 INTEGER, PARAMETER :: grid_center = grid_resolution/2
 INTEGER, PARAMETER :: zpower = 2
-INTEGER, PARAMETER :: miniter = 5
+INTEGER, PARAMETER :: miniter = 10000
 INTEGER*8, PARAMETER :: batchSize = 1000000
 REAL, PARAMETER :: escapeOrbit = 4
 REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3
  
-REAL, PARAMETER :: intensity = 2048.
+REAL, PARAMETER :: intensity = 255.
  
 INTEGER :: exposureMap(grid_resolution, grid_resolution)
 INTEGER :: maxExposure, minExposure
@@ -57,11 +57,11 @@ DO i=1, batchSize
 END DO
 !$END PARALLEL
  
-minExposure = MINVAL(exposureMap)
+!minExposure = MINVAL(exposureMap)
 maxExposure = MAXVAL(exposureMap)
 !write(*,*) maxExposure, minExposure
  
-exposureMap = (exposureMap / REAL(maxExposure))*intensity
+exposureMap = SQRT(exposureMap / REAL(maxExposure))*intensity
  
 open ( unit = file_out_unit, file = filename, status = 'replace', &
        form = 'formatted', access = 'sequential')
@@ -101,6 +101,8 @@ PURE FUNCTION notInMset(c, n_max)
  
     IF (n >= n_max) THEN
       notInMset = .FALSE.
+    ELSE IF (n < miniter) THEN
+      notInMset = .FALSE.  !Dirty trick to ignore point that exit before miniter
     ELSE
       notInMset = .TRUE.
     END IF
