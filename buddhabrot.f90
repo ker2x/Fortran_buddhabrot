@@ -6,26 +6,27 @@ CHARACTER ( len = 255 ), PARAMETER :: filename = 'buddhabrot.ppm'
 INTEGER, PARAMETER :: file_out_unit = 10
  
  
-INTEGER, PARAMETER :: n_max=100
-INTEGER, PARAMETER :: grid_resolution = 512
+INTEGER, PARAMETER :: n_max=1000
+INTEGER, PARAMETER :: grid_resolution = 2048
 INTEGER, PARAMETER :: grid_center = grid_resolution/2
 INTEGER, PARAMETER :: zpower = 2
-INTEGER, PARAMETER :: miniter = 2
-INTEGER*8, PARAMETER :: batchSize = 10000000
-REAL, PARAMETER :: escapeOrbit = 2
+INTEGER, PARAMETER :: miniter = 5
+INTEGER*8, PARAMETER :: batchSize = 100000000
+REAL, PARAMETER :: escapeOrbit = 4
 REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3
  
-REAL, PARAMETER :: intensityR = 2048.
-REAL, PARAMETER :: intensityG = 2048.
-REAL, PARAMETER :: intensityB = 2048.
+!REAL, PARAMETER :: intensityR = 2048.
+!REAL, PARAMETER :: intensityG = 2048.
+!REAL, PARAMETER :: intensityB = 2048.
  
 !Track pixel exposure by color
-INTEGER :: exposureRMap(grid_resolution, grid_resolution)
-INTEGER :: exposureGMap(grid_resolution, grid_resolution)
-INTEGER :: exposureBMap(grid_resolution, grid_resolution)
+!INTEGER :: exposureRMap(grid_resolution, grid_resolution)
+!INTEGER :: exposureGMap(grid_resolution, grid_resolution)
+!INTEGER :: exposureBMap(grid_resolution, grid_resolution)
+INTEGER :: exposureMap(grid_resolution, grid_resolution)
  
-INTEGER :: maxRExposure, maxGExposure, maxBExposure
-INTEGER :: minRExposure, minGExposure, minBExposure
+!INTEGER :: maxRExposure, maxGExposure, maxBExposure
+!INTEGER :: minRExposure, minGExposure, minBExposure
 INTEGER :: maxExposure, minExposure
  
 INTEGER*8 :: i
@@ -59,15 +60,15 @@ DO i=1, batchSize
         TempY = INT(grid_resolution * (AIMAG(z) + ymax) / (ymax - ymin))
         TempYm = INT(grid_center - (TempY - grid_resolution/2))
         IF((TempX > 0) .AND. (TempX < grid_resolution) .AND. (TempY > 0) .AND. (TempY < grid_resolution)) THEN
-          IF((iter > 2) .AND. (iter < 50)) THEN
+          IF((iter > 5) .AND. (iter < 500)) THEN
             exposureRMap(TempX, TempY)  = exposureRMap(TempX, TempY) + 1
             exposureRMap(TempX, TempYm) = exposureRMap(TempX, TempYm) + 1
           END IF
-          IF((iter > 25) .AND. (iter < 75)) THEN
+          IF((iter > 500) .AND. (iter < 750)) THEN
             exposureGMap(TempX, TempY)  = exposureGMap(TempX, TempY) + 1
             exposureGMap(TempX, TempYm) = exposureGMap(TempX, TempYm) + 1
           END IF
-          IF((iter > 50) .AND. (iter < 100)) THEN
+          IF((iter > 500) .AND. (iter < 1000)) THEN
             exposureBMap(TempX, TempY)  = exposureBMap(TempX, TempY) + 1
             exposureBMap(TempX, TempYm) = exposureBMap(TempX, TempYm) + 1
           ENDIF
