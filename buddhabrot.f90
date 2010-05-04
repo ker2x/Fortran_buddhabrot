@@ -11,7 +11,7 @@ INTEGER, PARAMETER :: grid_resolution = 2048
 INTEGER, PARAMETER :: grid_center = grid_resolution/2
 INTEGER, PARAMETER :: zpower = 2
 INTEGER, PARAMETER :: miniter = 5
-INTEGER*8, PARAMETER :: batchSize = 100000000
+INTEGER*8, PARAMETER :: batchSize = 1000000
 REAL, PARAMETER :: escapeOrbit = 4
 REAL, PARAMETER :: xmin = -1.0, xmax = 2.0, ymin = -1.3, ymax =1.3
  
@@ -34,7 +34,7 @@ INTEGER :: ppm_jlo
 !initialize exposureMap to 1
 exposureMap = 0
  
-!$OMP PARALLEL DO DEFAULT(PRIVATE),SHARED(exposureRMap, exposureGMap, exposureBMap)
+!$OMP PARALLEL DO DEFAULT(PRIVATE),SHARED(exposureMap)
 DO i=1, batchSize
   CALL RANDOM_NUMBER(x)
   CALL RANDOM_NUMBER(y)
@@ -57,36 +57,23 @@ DO i=1, batchSize
 END DO
 !$END PARALLEL
  
-
-
-!maxRExposure = MAXVAL(exposureRMap)
-!maxGExposure = MAXVAL(exposureGMap)
-!maxBExposure = MAXVAL(exposureBMap)
+minExposure = MINVAL(exposureMap)
 maxExposure = MAXVAL(exposureMap)
 !write(*,*) maxExposure, minExposure
  
-minExposure = MIN(minExposure)
-maxExposure = MAX(maxExposure)
- 
-!exposureRMap = exposureRMap - minExposure
-!exposureGMap = exposureGMap - minExposure
-!exposureBMap = exposureBMap - minExposure
-!exposureRMap = (exposureRMap / REAL(maxRExposure))*intensityR
-!exposureGMap = (exposureGMap / REAL(maxGExposure))*intensityG
-!exposureBMap = (exposureBMap / REAL(maxBExposure))*intensityB
-exposureBMap = (exposureMap / REAL(maxExposure))*intensity
+exposureMap = (exposureMap / REAL(maxExposure))*intensity
  
 open ( unit = file_out_unit, file = filename, status = 'replace', &
        form = 'formatted', access = 'sequential')
 write ( file_out_unit, '(a2)' ) 'P3'
 write ( file_out_unit, '(i5,2x,i5)' ) grid_resolution, grid_resolution
-write ( file_out_unit, '(i5)' ) INT(MAX(intensityR,intensityG,intensityB))
+write ( file_out_unit, '(i5)' ) INT(intensity)
  
 do ppm_i = 1, grid_resolution
 do ppm_jlo = 1, grid_resolution, 4
     ppm_jhi = min ( ppm_jlo + 3, grid_resolution )
     write ( file_out_unit, '(12i5)' ) &
-    ( exposureRMap(ppm_i,ppm_j), exposureGMap(ppm_i,ppm_j),exposureBMap(ppm_i,ppm_j), ppm_j = ppm_jlo,ppm_jhi )
+    ( exposureMap(ppm_i,ppm_j), exposureMap(ppm_i,ppm_j),exposureMap(ppm_i,ppm_j), ppm_j = ppm_jlo,ppm_jhi )
   end do
 end do
  
