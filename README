@@ -4,4 +4,4 @@ Only tested using Intel's fortran compiler (which is free for non-commercial use
 About openmp and segfault :
 the code is optimized for use with openmp.
 On my linux it segfault with large grid_resolution.
-Try to raise your stack size limit (ulimit -s) to something beggier.
+Try to raise your stack size limit (ulimit -s) to something bigger.
